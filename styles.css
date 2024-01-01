@@ -2,7 +2,7 @@
 body {
   font-family: 'Libre Franklin', sans-serif;
   font-size: 22px;
-  background-color: #6EBEB5;
+  background: linear-gradient(to bottom, #7ccec5 0%, #25857e 100%);
   margin: 0;
   padding: 20px; /* Space from edges */
   display: flex;
