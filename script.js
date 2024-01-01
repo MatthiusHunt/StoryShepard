@@ -1,3 +1,5 @@
+
+
 let currentOutlines = [];
 
 function renderOutlines(outlines) {
@@ -8,27 +10,18 @@ function renderOutlines(outlines) {
     const segmentDiv = document.createElement('div');
     segmentDiv.classList.add('segment');
 
-    const titleInput = document.createElement('input');
-    titleInput.type = 'text';
-    titleInput.value = outline.title || '';
-    titleInput.placeholder = 'Title';
-    titleInput.addEventListener('input', (event) => {
-      outlines[index].title = event.target.value;
+    const titleInput = createTextInput(outline.title, 'Title', (value) => {
+      outlines[index].title = value;
     });
 
-    const descriptionInput = document.createElement('textarea');
-    descriptionInput.value = outline.description || '';
-    descriptionInput.placeholder = 'Description';
-    descriptionInput.addEventListener('input', (event) => {
-      outlines[index].description = event.target.value;
+    const descriptionInput = createTextArea(outline.description, 'Description', (value) => {
+      outlines[index].description = value;
     });
 
     const subSegmentsDiv = document.createElement('div');
     subSegmentsDiv.classList.add('sub-segments');
 
-    const addSubSegmentBtn = document.createElement('button');
-    addSubSegmentBtn.textContent = 'Add Sub-Level';
-    addSubSegmentBtn.addEventListener('click', () => {
+    const addSubSegmentBtn = createButtonWithIcon('fa-plus', () => {
       if (!outlines[index].subSegments) {
         outlines[index].subSegments = [];
       }
@@ -36,84 +29,127 @@ function renderOutlines(outlines) {
       renderOutlines(outlines);
     });
 
-    const editSubSegmentBtn = document.createElement('button');
-    editSubSegmentBtn.textContent = 'Edit Sub-Level(s)';
-    editSubSegmentBtn.addEventListener('click', () => {
+    const editSubSegmentBtn = createButtonWithText('Edit', () => {
       if (Array.isArray(outlines[index].subSegments)) {
         currentOutlines = outlines[index].subSegments;
-        currentOutlines.__parent = outlines; // Save the parent level
+        currentOutlines.__parent = outlines;
         renderOutlines(currentOutlines);
       }
     });
 
     segmentDiv.appendChild(titleInput);
     segmentDiv.appendChild(descriptionInput);
-    segmentDiv.appendChild(addSubSegmentBtn);
-    segmentDiv.appendChild(editSubSegmentBtn);
-    segmentDiv.appendChild(subSegmentsDiv);
+    subSegmentsDiv.appendChild(addSubSegmentBtn);
+    subSegmentsDiv.appendChild(editSubSegmentBtn);
 
+    segmentDiv.appendChild(subSegmentsDiv);
     outlinesContainer.appendChild(segmentDiv);
 
     if (Array.isArray(outline.subSegments)) {
       outline.subSegments.forEach((subSegment, subIndex) => {
-        const subSegmentDiv = document.createElement('div');
-        subSegmentDiv.classList.add('segment');
-
-        const subTitleInput = document.createElement('input');
-        subTitleInput.type = 'text';
-        subTitleInput.value = subSegment.title || '';
-        subTitleInput.placeholder = 'Title';
-        subTitleInput.addEventListener('input', (event) => {
-          outlines[index].subSegments[subIndex].title = event.target.value;
-        });
-
-        const subDescriptionInput = document.createElement('textarea');
-        subDescriptionInput.value = subSegment.description || '';
-        subDescriptionInput.placeholder = 'Description';
-        subDescriptionInput.addEventListener('input', (event) => {
-          outlines[index].subSegments[subIndex].description = event.target.value;
-        });
-
-        const moveUpBtn = document.createElement('button');
-        moveUpBtn.textContent = 'Move Up';
-        moveUpBtn.addEventListener('click', () => {
-          moveSubSegment(outlines[index].subSegments, subIndex, -1);
-          renderOutlines(outlines);
-        });
-
-        const moveDownBtn = document.createElement('button');
-        moveDownBtn.textContent = 'Move Down';
-        moveDownBtn.addEventListener('click', () => {
-          moveSubSegment(outlines[index].subSegments, subIndex, 1);
-          renderOutlines(outlines);
-        });
-
-        subSegmentDiv.appendChild(subTitleInput);
-        subSegmentDiv.appendChild(subDescriptionInput);
-        subSegmentDiv.appendChild(moveUpBtn);
-        subSegmentDiv.appendChild(moveDownBtn);
-
+        const subSegmentDiv = createSubSegment(outlines, index, subSegment, subIndex);
         subSegmentsDiv.appendChild(subSegmentDiv);
       });
     }
   });
+
+  updateLevelIndicator(outlines);
+}
+
+function createTextInput(value, placeholder, onInput) {
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.value = value || '';
+  input.placeholder = placeholder;
+  input.addEventListener('input', (event) => onInput(event.target.value));
+  return input;
+}
+
+function createTextArea(value, placeholder, onInput) {
+  const input = document.createElement('textarea');
+  input.value = value || '';
+  input.placeholder = placeholder;
+  input.addEventListener('input', (event) => onInput(event.target.value));
+  return input;
+}
+
+function createButtonWithIcon(iconClass, onClick) {
+  const button = document.createElement('button');
+  const icon = document.createElement('i');
+  icon.classList.add('fa-solid', iconClass);
+  button.appendChild(icon);
+  button.addEventListener('click', onClick);
+  return button;
+}
+
+function createButtonWithText(text, onClick) {
+  const button = document.createElement('button');
+  button.textContent = text;
+  button.addEventListener('click', onClick);
+  return button;
+}
+
+function createSubSegment(outlines, index, subSegment, subIndex) {
+  const subSegmentDiv = document.createElement('div');
+  subSegmentDiv.classList.add('segment');
+
+  const subTitleInput = createTextInput(subSegment.title, 'Title', (value) => {
+    outlines[index].subSegments[subIndex].title = value;
+  });
+
+  const subDescriptionInput = createTextArea(subSegment.description, 'Description', (value) => {
+    outlines[index].subSegments[subIndex].description = value;
+  });
+
+  const moveUpBtn = createButtonWithIcon('fa-arrow-up', () => {
+    moveSubSegment(outlines[index].subSegments, subIndex, -1);
+    renderOutlines(outlines);
+  });
+
+  const moveDownBtn = createButtonWithIcon('fa-arrow-down', () => {
+    moveSubSegment(outlines[index].subSegments, subIndex, 1);
+    renderOutlines(outlines);
+  });
+
+  subSegmentDiv.appendChild(subTitleInput);
+  subSegmentDiv.appendChild(subDescriptionInput);
+  subSegmentDiv.appendChild(moveUpBtn);
+  subSegmentDiv.appendChild(moveDownBtn);
+
+  return subSegmentDiv;
 }
 
 function moveSubSegment(array, index, offset) {
   const newIndex = index + offset;
   if (newIndex >= 0 && newIndex < array.length) {
-    // Swap elements
     [array[index], array[newIndex]] = [array[newIndex], array[index]];
   }
 }
 
+function updateLevelIndicator(outlines) {
+  const levelIndicator = document.getElementById('currentLevel');
+  levelIndicator.textContent = `Level: ${calculateDepth(outlines)}`;
+}
+
+function calculateDepth(outlines) {
+  let depth = 1;
+  let current = outlines;
+  while (current.__parent) {
+    depth++;
+    current = current.__parent;
+  }
+  return depth;
+}
+
 function goToParentLevel() {
-  // Check if there is a parent level
   if (currentOutlines.__parent) {
     currentOutlines = currentOutlines.__parent;
     renderOutlines(currentOutlines);
   }
 }
+
+
+
 
 // Initial outline for demonstration
 currentOutlines = [
@@ -123,15 +159,7 @@ currentOutlines = [
     subSegments: [
       {
         title: 'Part 1',
-        description: 'This is the beginning of your story',
-      },
-      {
-        title: 'Part 2',
-        description: 'This is the middle of your story',
-      },
-      {
-        title: 'Part 3',
-        description: 'This is the end of your story',
+        description: 'Description',
       },
     ],
   },
@@ -141,30 +169,75 @@ currentOutlines = [
 renderOutlines(currentOutlines);
 
 
-// View the outline, line by line as a txt document
-function viewLineByLine() {
-  // Check if there are currentOutlines to display
-  if (currentOutlines.length > 0) {
-    // Create a new window or tab for the line-by-line view
-    const lineByLineWindow = window.open('', '_blank');
-    
-    // Write the line-by-line content to the new window
-    lineByLineWindow.document.write('<h2>Line-by-Line View</h2>');
-    currentOutlines.forEach((outline, index) => {
-      lineByLineWindow.document.write(`<p><strong>${index + 1}. ${outline.title}</strong>: ${outline.description}</p>`);
-      
-      if (Array.isArray(outline.subSegments)) {
-        outline.subSegments.forEach((subSegment, subIndex) => {
-          lineByLineWindow.document.write(`<p>&nbsp;&nbsp;&nbsp;&nbsp;<strong>${index + 1}.${subIndex + 1}. ${subSegment.title}</strong>: ${subSegment.description}</p>`);
-        });
-      }
-    });
+// Function to reset outlines
+function resetOutlines() {
+currentOutlines = [
+  {
+    title: 'Title: Main Level',
+    description: 'Elevator Pitch',
+    subSegments: [
+      {
+        title: 'Part 1',
+        description: 'Description',
+      },
+    ],
+  },
+];
+  // Re-render the outlines
+  renderOutlines(currentOutlines);
+}
 
-    // Close the document to finalize the content
-    lineByLineWindow.document.close();
-  } else {
-    // Alert the user if there are no outlines to display
-    alert('No outlines available. Please create an outline first.');
+// Add event listener to the reset button
+document.getElementById('resetButton').addEventListener('click', resetOutlines);
+
+
+// Recursive function to write outline details to the document
+function writeOutlineToDocument(outline, level, doc) {
+  doc.write(`<p><strong>${level}. ${outline.title}</strong>: ${outline.description}</p>`);
+  
+  if (Array.isArray(outline.subSegments)) {
+    outline.subSegments.forEach((subSegment, index) => {
+      const subLevel = `${level}.${index + 1}`;
+      writeOutlineToDocument(subSegment, subLevel, doc);
+    });
   }
 }
 
+function downloadOutlines() {
+    // Function to find the topmost parent level
+    function findTopLevel(outlines) {
+        let currentLevel = outlines;
+        while (currentLevel.__parent) {
+            currentLevel = currentLevel.__parent;
+        }
+        return currentLevel;
+    }
+
+    // Function to capture text from all levels
+    function captureText(outline, depth = 0) {
+        let text = `${'   '.repeat(depth)}${outline.title ? outline.title + '\n' : ''}${'   '.repeat(depth)}${outline.description ? outline.description + '\n' : ''}`;
+
+        if (outline.subSegments && Array.isArray(outline.subSegments)) {
+            outline.subSegments.forEach(subSegment => {
+                text += captureText(subSegment, depth + 1);
+            });
+        }
+
+        return text;
+    }
+
+    // Start from the topmost level
+    const topLevelOutlines = findTopLevel(currentOutlines);
+
+    // Apply the recursive function to each main segment
+    const outlinesText = topLevelOutlines.map(outline => captureText(outline)).join('\n');
+
+    // Create a Blob and download as before
+    const blob = new Blob([outlinesText], { type: "text/plain" });
+    const link = document.createElement("a");
+    link.download = "outlines.txt";
+    link.href = window.URL.createObjectURL(blob);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
