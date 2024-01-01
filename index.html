@@ -4,23 +4,29 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Story Shepard</title>
-  <link rel="stylesheet" href="styles.css">
+  <link href="https://fonts.googleapis.com/css?family=Libre+Franklin" rel="stylesheet">
+  <script src="https://kit.fontawesome.com/7f8ac56d4f.js" crossorigin="anonymous"></script>
 </head>
 <body>
-
-  
-  
   <div id="app">
-    <h1>Story Shepard</h1>
-     <button id="lineByLineBtn" onclick="viewLineByLine()">View Line-by-Line</button>
-   
-    <button id="backBtn" onclick="goToParentLevel()">Back</button>
+    <!-- Logo Link -->
+    <a href="https://firstdraftr.com/" target="_blank" class="logo-link">
+      <img src="https://firstdraftr.files.wordpress.com/2024/01/story-shepard-logo-1.png" alt="FirstDraftr Logo" class="logo">
+    </a>
+    
+    <!-- Current Level Indicator -->
+    <h3 id="currentLevel">Level: 1</h3>
+
+    <!-- Control Buttons -->
+    <button id="resetButton"><i class="fa-solid fa-arrows-rotate"></i></button>
+    <button id="backBtn" onclick="goToParentLevel()"><i class="fa-solid fa-arrow-left"></i></button>
+    <button id="downloadOutline" onclick="downloadOutlines()"><i class="fa-solid fa-arrow-up-from-bracket"></i></button>
+
+    <!-- Outlines Container -->
     <div id="outlines"></div>
   </div>
 
-
-
-<!-- Existing HTML code... -->
+  <!-- JavaScript File -->
   <script src="script.js"></script>
 </body>
 </html>
