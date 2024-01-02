@@ -182,10 +182,10 @@ renderOutlines(currentOutlines);
 // Function to reset outlines
 function resetOutlines() {
   currentOutlines = [{
-    title: 'Title: Main Level',
-    description: 'Elevator Pitch',
-    subSegments: [],
-  }, ];
+  title: 'Title: Main Level',
+  description: 'Elevator Pitch',
+  subSegments: [],
+}, ];
   // Re-render the outlines
   renderOutlines(currentOutlines);
 }
