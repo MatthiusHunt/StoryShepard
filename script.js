@@ -184,10 +184,7 @@ function resetOutlines() {
   currentOutlines = [{
     title: 'Title: Main Level',
     description: 'Elevator Pitch',
-    subSegments: [{
-      title: 'Part 1',
-      description: 'Description',
-    }, ],
+    subSegments: [],
   }, ];
   // Re-render the outlines
   renderOutlines(currentOutlines);
