@@ -218,10 +218,10 @@ function downloadOutlines() {
     let text = `${numberString} ${outline.title ? outline.title + '\n' : ''}`;
 
     if (outline.subSegments && Array.isArray(outline.subSegments)) {
-        outline.subSegments.forEach((subSegment, index) => {
-            let newNumberString = `${numberString}.${index + 1}`;
-            text += captureText(subSegment, newNumberString);
-        });
+      outline.subSegments.forEach((subSegment, index) => {
+        let newNumberString = `${numberString}.${index + 1}`;
+        text += captureText(subSegment, newNumberString);
+      });
     }
 
     return text;
@@ -231,15 +231,17 @@ function downloadOutlines() {
   const topLevelOutlines = findTopLevel(currentOutlines);
 
   // Use the title of the first top-level outline as the filename, if available
-  const filename = topLevelOutlines.length > 0 && topLevelOutlines[0].title ? 
-                   topLevelOutlines[0].title.replace(/[^a-z0-9]/gi, '_').toLowerCase() + '.txt' : 
-                   'outlines.txt'; // Default filename if no title
+  const filename = topLevelOutlines.length > 0 && topLevelOutlines[0].title ?
+    topLevelOutlines[0].title.replace(/[^a-z0-9]/gi, '_').toLowerCase() + '.txt' :
+    'outlines.txt'; // Default filename if no title
 
   // Apply the recursive function to each main segment
   const outlinesText = topLevelOutlines.map(outline => captureText(outline)).join('\n');
 
   // Create a Blob and download
-  const blob = new Blob([outlinesText], { type: "text/plain" });
+  const blob = new Blob([outlinesText], {
+    type: "text/plain"
+  });
   const link = document.createElement("a");
   link.download = filename; // Set the filename
   link.href = window.URL.createObjectURL(blob);
@@ -266,6 +268,9 @@ function importOutlines(event) {
 }
 
 
+
+
+
 function parseContentToOutline(content) {
   const lines = content.trim().split('\n');
   const outlines = [];
@@ -276,7 +281,10 @@ function parseContentToOutline(content) {
     const depth = numberString.split('.').length - 1;
     const title = line.substring(numberString.length + 1).trim();
 
-    const newOutline = { title: title, subSegments: [] };
+    const newOutline = {
+      title: title,
+      subSegments: []
+    };
 
     while (currentOutlineLevelStack.length - 1 > depth) {
       currentOutlineLevelStack.pop();
