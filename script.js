@@ -12,10 +12,6 @@ function renderOutlines(outlines) {
       outlines[index].title = value;
     });
 
-    const descriptionInput = createTextArea(outline.description, 'Description', (value) => {
-      outlines[index].description = value;
-    });
-
     const subSegmentsDiv = document.createElement('div');
     subSegmentsDiv.classList.add('sub-segments');
 
@@ -34,10 +30,7 @@ function renderOutlines(outlines) {
 
 
     segmentDiv.appendChild(titleInput);
-    segmentDiv.appendChild(descriptionInput);
     subSegmentsDiv.appendChild(addSubSegmentBtn);
-
-
     segmentDiv.appendChild(subSegmentsDiv);
     outlinesContainer.appendChild(segmentDiv);
 
@@ -89,13 +82,10 @@ function createSubSegment(outlines, index, subSegment, subIndex) {
   const subSegmentDiv = document.createElement('div');
   subSegmentDiv.classList.add('segment');
 
-  const subTitleInput = createTextInput(subSegment.title, 'Title', (value) => {
+  const subTitleInput = createTextInput(subSegment.title, 'One sentence description', (value) => {
     outlines[index].subSegments[subIndex].title = value;
   });
 
-  const subDescriptionInput = createTextArea(subSegment.description, 'Description', (value) => {
-    outlines[index].subSegments[subIndex].description = value;
-  });
 
   const moveUpBtn = createButtonWithIcon('fa-arrow-up', () => {
     moveSubSegment(outlines[index].subSegments, subIndex, -1);
@@ -110,7 +100,6 @@ function createSubSegment(outlines, index, subSegment, subIndex) {
   moveDownBtn.title = "Move Segment Down";
 
   subSegmentDiv.appendChild(subTitleInput);
-  subSegmentDiv.appendChild(subDescriptionInput);
   subSegmentDiv.appendChild(moveUpBtn);
   subSegmentDiv.appendChild(moveDownBtn);
 
@@ -180,8 +169,7 @@ function calculateDepth(outlines) {
 
 // Initial outline for demonstration
 currentOutlines = [{
-  title: 'Title: Main Level',
-  description: 'Elevator Pitch',
+  title: 'Your Project',
   subSegments: [],
 }, ];
 
@@ -227,22 +215,22 @@ function downloadOutlines() {
   }
 
   function captureText(outline, numberString = '0') {
-    // Concatenate the number, title, and description directly
-    let text = `${numberString} ${outline.title ? outline.title : ''}\n${numberString} ${outline.description ? outline.description : ''}\n`;
+    let text = `${numberString} ${outline.title ? outline.title + '\n' : ''}`;
 
     if (outline.subSegments && Array.isArray(outline.subSegments)) {
-      outline.subSegments.forEach((subSegment, index) => {
-        // New numbering for sub-segment
-        let newNumberString = `${numberString}.${index + 1}`;
-
-        // Recursive call for sub-segment
-        text += captureText(subSegment, newNumberString);
-      });
+        outline.subSegments.forEach((subSegment, index) => {
+            let newNumberString = `${numberString}.${index + 1}`;
+            text += captureText(subSegment, newNumberString);
+        });
     }
 
     return text;
   }
 
+  // Use the title of the first outline as the filename, if available
+  const filename = currentOutlines.length > 0 && currentOutlines[0].title ? 
+                   currentOutlines[0].title.replace(/[^a-z0-9]/gi, '_').toLowerCase() + '.txt' : 
+                   'outlines.txt'; // Default filename if no title
 
   // Start from the topmost level
   const topLevelOutlines = findTopLevel(currentOutlines);
@@ -250,14 +238,62 @@ function downloadOutlines() {
   // Apply the recursive function to each main segment
   const outlinesText = topLevelOutlines.map(outline => captureText(outline)).join('\n');
 
-  // Create a Blob and download as before
-  const blob = new Blob([outlinesText], {
-    type: "text/plain"
-  });
+  // Create a Blob and download
+  const blob = new Blob([outlinesText], { type: "text/plain" });
   const link = document.createElement("a");
-  link.download = "outlines.txt";
+  link.download = filename; // Set the filename
   link.href = window.URL.createObjectURL(blob);
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
 }
+
+
+
+
+function importOutlines(event) {
+  const file = event.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const content = e.target.result;
+      // Parse the content and reconstruct the outline
+      currentOutlines = parseContentToOutline(content);
+      renderOutlines(currentOutlines);
+    };
+    reader.readAsText(file);
+  }
+}
+
+
+
+
+
+function parseContentToOutline(content) {
+  const lines = content.trim().split('\n');
+  const outlines = [];
+  let currentOutlineLevelStack = [outlines];
+
+  lines.forEach(line => {
+    const numberString = line.split(' ')[0];
+    const depth = numberString.split('.').length - 1;
+    const title = line.substring(numberString.length + 1).trim();
+
+    const newOutline = { title: title, subSegments: [] };
+
+    while (currentOutlineLevelStack.length - 1 > depth) {
+      currentOutlineLevelStack.pop();
+    }
+
+    currentOutlineLevelStack[currentOutlineLevelStack.length - 1].push(newOutline);
+
+    currentOutlineLevelStack.push(newOutline.subSegments);
+  });
+
+  return outlines;
+}
+
+
+
+
+
