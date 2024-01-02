@@ -1,5 +1,3 @@
-
-
 let currentOutlines = [];
 
 function renderOutlines(outlines) {
@@ -25,7 +23,10 @@ function renderOutlines(outlines) {
       if (!outlines[index].subSegments) {
         outlines[index].subSegments = [];
       }
-      outlines[index].subSegments.push({ title: '', description: '' });
+      outlines[index].subSegments.push({
+        title: '',
+        description: ''
+      });
       renderOutlines(outlines);
     });
 
@@ -131,6 +132,31 @@ function updateLevelIndicator(outlines) {
   levelIndicator.textContent = `Level: ${calculateDepth(outlines)}`;
 }
 
+
+function goToParentLevel() {
+  if (currentOutlines.__parent) {
+    currentOutlines = currentOutlines.__parent;
+    renderOutlines(currentOutlines);
+  }
+}
+
+
+function goToChildLevel() {
+  // Check if the current level has sub-segments
+  if (currentOutlines && currentOutlines.length > 0 && currentOutlines[0].subSegments) {
+    // Set the __parent reference for back navigation
+    currentOutlines[0].subSegments.__parent = currentOutlines;
+
+    // Navigate to the sub-segments of the first segment in the current level
+    currentOutlines = currentOutlines[0].subSegments;
+    renderOutlines(currentOutlines);
+
+    // Update the level indicator
+    updateLevelIndicator(currentOutlines);
+  }
+}
+
+
 function calculateDepth(outlines) {
   let depth = 1;
   let current = outlines;
@@ -141,29 +167,13 @@ function calculateDepth(outlines) {
   return depth;
 }
 
-function goToParentLevel() {
-  if (currentOutlines.__parent) {
-    currentOutlines = currentOutlines.__parent;
-    renderOutlines(currentOutlines);
-  }
-}
-
-
-
 
 // Initial outline for demonstration
-currentOutlines = [
-  {
-    title: 'Title: Main Level',
-    description: 'Elevator Pitch',
-    subSegments: [
-      {
-        title: 'Part 1',
-        description: 'Description',
-      },
-    ],
-  },
-];
+currentOutlines = [{
+  title: 'Title: Main Level',
+  description: 'Elevator Pitch',
+  subSegments: [],
+}, ];
 
 // Initial rendering
 renderOutlines(currentOutlines);
@@ -171,18 +181,14 @@ renderOutlines(currentOutlines);
 
 // Function to reset outlines
 function resetOutlines() {
-currentOutlines = [
-  {
+  currentOutlines = [{
     title: 'Title: Main Level',
     description: 'Elevator Pitch',
-    subSegments: [
-      {
-        title: 'Part 1',
-        description: 'Description',
-      },
-    ],
-  },
-];
+    subSegments: [{
+      title: 'Part 1',
+      description: 'Description',
+    }, ],
+  }, ];
   // Re-render the outlines
   renderOutlines(currentOutlines);
 }
@@ -194,7 +200,7 @@ document.getElementById('resetButton').addEventListener('click', resetOutlines);
 // Recursive function to write outline details to the document
 function writeOutlineToDocument(outline, level, doc) {
   doc.write(`<p><strong>${level}. ${outline.title}</strong>: ${outline.description}</p>`);
-  
+
   if (Array.isArray(outline.subSegments)) {
     outline.subSegments.forEach((subSegment, index) => {
       const subLevel = `${level}.${index + 1}`;
@@ -204,40 +210,42 @@ function writeOutlineToDocument(outline, level, doc) {
 }
 
 function downloadOutlines() {
-    // Function to find the topmost parent level
-    function findTopLevel(outlines) {
-        let currentLevel = outlines;
-        while (currentLevel.__parent) {
-            currentLevel = currentLevel.__parent;
-        }
-        return currentLevel;
+  // Function to find the topmost parent level
+  function findTopLevel(outlines) {
+    let currentLevel = outlines;
+    while (currentLevel.__parent) {
+      currentLevel = currentLevel.__parent;
+    }
+    return currentLevel;
+  }
+
+  // Function to capture text from all levels
+  function captureText(outline, depth = 0) {
+    let text = `${'   '.repeat(depth)}${outline.title ? outline.title + '\n' : ''}${'   '.repeat(depth)}${outline.description ? outline.description + '\n' : ''}`;
+
+    if (outline.subSegments && Array.isArray(outline.subSegments)) {
+      outline.subSegments.forEach(subSegment => {
+        text += captureText(subSegment, depth + 1);
+      });
     }
 
-    // Function to capture text from all levels
-    function captureText(outline, depth = 0) {
-        let text = `${'   '.repeat(depth)}${outline.title ? outline.title + '\n' : ''}${'   '.repeat(depth)}${outline.description ? outline.description + '\n' : ''}`;
+    return text;
+  }
 
-        if (outline.subSegments && Array.isArray(outline.subSegments)) {
-            outline.subSegments.forEach(subSegment => {
-                text += captureText(subSegment, depth + 1);
-            });
-        }
+  // Start from the topmost level
+  const topLevelOutlines = findTopLevel(currentOutlines);
 
-        return text;
-    }
+  // Apply the recursive function to each main segment
+  const outlinesText = topLevelOutlines.map(outline => captureText(outline)).join('\n');
 
-    // Start from the topmost level
-    const topLevelOutlines = findTopLevel(currentOutlines);
-
-    // Apply the recursive function to each main segment
-    const outlinesText = topLevelOutlines.map(outline => captureText(outline)).join('\n');
-
-    // Create a Blob and download as before
-    const blob = new Blob([outlinesText], { type: "text/plain" });
-    const link = document.createElement("a");
-    link.download = "outlines.txt";
-    link.href = window.URL.createObjectURL(blob);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  // Create a Blob and download as before
+  const blob = new Blob([outlinesText], {
+    type: "text/plain"
+  });
+  const link = document.createElement("a");
+  link.download = "outlines.txt";
+  link.href = window.URL.createObjectURL(blob);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
 }
