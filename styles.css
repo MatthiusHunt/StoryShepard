@@ -80,6 +80,13 @@ button:hover {
 #backBtn:hover {
   background-color: #5A7281;
 }
+#forwardBtn {
+  background-color: #131020;
+}
+
+#forwardBtn:hover {
+  background-color: #5A7281;
+}
 
 /* Input and Textarea Styles */
 input, textarea {
