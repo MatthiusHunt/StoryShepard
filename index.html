@@ -11,12 +11,15 @@
   </head>
 
   <body>
+    
     <div id="app">
       <!-- Logo Link -->
       <a href="https://firstdraftr.com/" target="_blank" class="logo-link">
         <img src="https://firstdraftr.files.wordpress.com/2024/01/story-shepard-logo-1.png" alt="FirstDraftr Logo" class="logo">
       </a>
+      <input type="file" title="Import a Previously Downloaded Story Shepard File" id="importFile" accept=".txt" onchange="importOutlines(event)">
 
+      
       <!-- Current Level Indicator -->
       <h3 id="currentLevel">Level: 1</h3>
 
