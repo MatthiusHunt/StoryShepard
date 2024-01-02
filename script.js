@@ -29,19 +29,14 @@ function renderOutlines(outlines) {
       });
       renderOutlines(outlines);
     });
+    addSubSegmentBtn.title = "Add Sub-Segment";
 
-    const editSubSegmentBtn = createButtonWithText('Edit', () => {
-      if (Array.isArray(outlines[index].subSegments)) {
-        currentOutlines = outlines[index].subSegments;
-        currentOutlines.__parent = outlines;
-        renderOutlines(currentOutlines);
-      }
-    });
+
 
     segmentDiv.appendChild(titleInput);
     segmentDiv.appendChild(descriptionInput);
     subSegmentsDiv.appendChild(addSubSegmentBtn);
-    subSegmentsDiv.appendChild(editSubSegmentBtn);
+    
 
     segmentDiv.appendChild(subSegmentsDiv);
     outlinesContainer.appendChild(segmentDiv);
@@ -106,11 +101,13 @@ function createSubSegment(outlines, index, subSegment, subIndex) {
     moveSubSegment(outlines[index].subSegments, subIndex, -1);
     renderOutlines(outlines);
   });
+  moveUpBtn.title = "Move Segment Up";
 
   const moveDownBtn = createButtonWithIcon('fa-arrow-down', () => {
     moveSubSegment(outlines[index].subSegments, subIndex, 1);
     renderOutlines(outlines);
   });
+  moveDownBtn.title = "Move Segment Down";
 
   subSegmentDiv.appendChild(subTitleInput);
   subSegmentDiv.appendChild(subDescriptionInput);
