@@ -227,13 +227,13 @@ function downloadOutlines() {
     return text;
   }
 
-  // Use the title of the first outline as the filename, if available
-  const filename = currentOutlines.length > 0 && currentOutlines[0].title ? 
-                   currentOutlines[0].title.replace(/[^a-z0-9]/gi, '_').toLowerCase() + '.txt' : 
-                   'outlines.txt'; // Default filename if no title
-
   // Start from the topmost level
   const topLevelOutlines = findTopLevel(currentOutlines);
+
+  // Use the title of the first top-level outline as the filename, if available
+  const filename = topLevelOutlines.length > 0 && topLevelOutlines[0].title ? 
+                   topLevelOutlines[0].title.replace(/[^a-z0-9]/gi, '_').toLowerCase() + '.txt' : 
+                   'outlines.txt'; // Default filename if no title
 
   // Apply the recursive function to each main segment
   const outlinesText = topLevelOutlines.map(outline => captureText(outline)).join('\n');
@@ -266,9 +266,6 @@ function importOutlines(event) {
 }
 
 
-
-
-
 function parseContentToOutline(content) {
   const lines = content.trim().split('\n');
   const outlines = [];
@@ -292,8 +289,3 @@ function parseContentToOutline(content) {
 
   return outlines;
 }
-
-
-
-
-
