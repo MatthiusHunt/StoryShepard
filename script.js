@@ -36,7 +36,7 @@ function renderOutlines(outlines) {
     segmentDiv.appendChild(titleInput);
     segmentDiv.appendChild(descriptionInput);
     subSegmentsDiv.appendChild(addSubSegmentBtn);
-    
+
 
     segmentDiv.appendChild(subSegmentsDiv);
     outlinesContainer.appendChild(segmentDiv);
@@ -139,19 +139,32 @@ function goToParentLevel() {
 
 
 function goToChildLevel() {
-  // Check if the current level has sub-segments
-  if (currentOutlines && currentOutlines.length > 0 && currentOutlines[0].subSegments) {
-    // Set the __parent reference for back navigation
-    currentOutlines[0].subSegments.__parent = currentOutlines;
+  // Create a new array to hold all sub-segments from the current level
+  let allSubSegments = [];
 
-    // Navigate to the sub-segments of the first segment in the current level
-    currentOutlines = currentOutlines[0].subSegments;
+  // Check if the current level has segments and gather all their sub-segments
+  if (currentOutlines && currentOutlines.length > 0) {
+    currentOutlines.forEach(outline => {
+      if (outline.subSegments && outline.subSegments.length > 0) {
+        allSubSegments = allSubSegments.concat(outline.subSegments);
+      }
+    });
+  }
+
+  // Check if we have gathered any sub-segments
+  if (allSubSegments.length > 0) {
+    // Set the __parent reference for back navigation
+    allSubSegments.__parent = currentOutlines;
+
+    // Navigate to the combined sub-segments
+    currentOutlines = allSubSegments;
     renderOutlines(currentOutlines);
 
     // Update the level indicator
     updateLevelIndicator(currentOutlines);
   }
 }
+
 
 
 function calculateDepth(outlines) {
@@ -179,10 +192,10 @@ renderOutlines(currentOutlines);
 // Function to reset outlines
 function resetOutlines() {
   currentOutlines = [{
-  title: 'Title: Main Level',
-  description: 'Elevator Pitch',
-  subSegments: [],
-}, ];
+    title: 'Title: Main Level',
+    description: 'Elevator Pitch',
+    subSegments: [],
+  }, ];
   // Re-render the outlines
   renderOutlines(currentOutlines);
 }
@@ -213,18 +226,23 @@ function downloadOutlines() {
     return currentLevel;
   }
 
-  // Function to capture text from all levels
-  function captureText(outline, depth = 0) {
-    let text = `${'   '.repeat(depth)}${outline.title ? outline.title + '\n' : ''}${'   '.repeat(depth)}${outline.description ? outline.description + '\n' : ''}`;
+  function captureText(outline, numberString = '0') {
+    // Concatenate the number, title, and description directly
+    let text = `${numberString} ${outline.title ? outline.title : ''}\n${numberString} ${outline.description ? outline.description : ''}\n`;
 
     if (outline.subSegments && Array.isArray(outline.subSegments)) {
-      outline.subSegments.forEach(subSegment => {
-        text += captureText(subSegment, depth + 1);
+      outline.subSegments.forEach((subSegment, index) => {
+        // New numbering for sub-segment
+        let newNumberString = `${numberString}.${index + 1}`;
+
+        // Recursive call for sub-segment
+        text += captureText(subSegment, newNumberString);
       });
     }
 
     return text;
   }
+
 
   // Start from the topmost level
   const topLevelOutlines = findTopLevel(currentOutlines);
