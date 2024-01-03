@@ -99,9 +99,19 @@ function createSubSegment(outlines, index, subSegment, subIndex) {
   });
   moveDownBtn.title = "Move Segment Down";
 
+  const deleteBtn = createButtonWithIcon('fa-trash', () => {
+    outlines[index].subSegments.splice(subIndex, 1);
+    renderOutlines(outlines);
+    
+  });
+  deleteBtn.classList.add('delete-button');
+	deleteBtn.title = "Delete Sub-Segment";
+
+
   subSegmentDiv.appendChild(subTitleInput);
   subSegmentDiv.appendChild(moveUpBtn);
   subSegmentDiv.appendChild(moveDownBtn);
+  subSegmentDiv.appendChild(deleteBtn); // Append the delete button
 
   return subSegmentDiv;
 }
