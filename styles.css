@@ -88,6 +88,15 @@ button:hover {
   background-color: #5A7281;
 }
 
+.delete-button {
+  background-color: #EF6F6C; /* Normal background color */
+}
+
+.delete-button:hover {
+  background-color: #ea423e; /* Hover background color */
+}
+
+
 /* Input and Textarea Styles */
 input, textarea {
   width: 100%;
